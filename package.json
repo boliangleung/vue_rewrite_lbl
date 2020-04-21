@@ -1,0 +1,31 @@
+{
+  "name": "vue_rewrite_lbl",
+  "version": "1.0.0",
+  "description": "tips for myself",
+  "main": "rollup.config.js",
+  "dependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "rollup": "^2.6.1",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-serve": "^1.0.1"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c",
+    "serve": "cross-env ENV=development rollup -c -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boliangleung/vue_rewrite_lbl.git"
+  },
+  "author": "lbl",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/boliangleung/vue_rewrite_lbl/issues"
+  },
+  "homepage": "https://github.com/boliangleung/vue_rewrite_lbl#readme"
+}

@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>rewrite vue lbl</title>
+</head>
+<body>
+	<div id="app"> aini我爱学习
+		<p>hellow</p>
+		<span style="color: red;background: yellow;">{{name}}</span>
+			<span>{{detail.age}}{{detail.love}}</span>
+	</div>
+
+</body>
+</html>
+<script type="text/javascript" src="/dist/umd/vue.js"></script>
+<script type="text/javascript">
+	let app = new Vue({
+		el:"#app",
+		data(){
+			return{
+				name:"lbl study vue",
+				detail:{
+					age:"25",
+					love:"vue"
+				},
+				observeArr:[{a:1,b:2},'study']
+			}
+		}
+	})
+	app._data.observeArr.unshift({name:"lbl"})
+</script>
