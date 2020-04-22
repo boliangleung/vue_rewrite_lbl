@@ -11,7 +11,7 @@ export function patch(oldVode,vnode){
 		let el=createElm(vnode)
 		parentElm.insertBefore(el,oldElm.nextSibling) //插入在老元素的ID之后 紧随那种 不能用append 要不然会在最后
 		parentElm.removeChild(oldElm) // 删除老结点
-
+		return el;
 	}
 
 	// 递归创建真实结点 替换掉老的结点。

@@ -2,7 +2,7 @@ import babel from "rollup-plugin-babel"
 import serve from "rollup-plugin-serve"
 
 export default{
-	input:"./src/index.js", // 入口
+	input:"./src/index.js", //  src 2.0入口     src3.0 3.0入口
 	output:{
 		file:"dist/umd/vue.js",
 		name:"Vue", //指定打包后全局变量的名字 也就是函数库

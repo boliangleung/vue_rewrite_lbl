@@ -1,6 +1,7 @@
 export function isObject(data){
 	return typeof data ==='object'&&data!==null
 }
+// 判断是否被监听过 而且给key加上value值
 export function def(data,key,value){
 	Object.defineProperty(data,key,{
 		enumerable:false,

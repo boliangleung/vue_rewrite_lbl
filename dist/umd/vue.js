@@ -100,7 +100,8 @@
 
   function isObject(data) {
     return _typeof(data) === 'object' && data !== null;
-  }
+  } // 判断是否被监听过 而且给key加上value值
+
   function def(data, key, value) {
     Object.defineProperty(data, key, {
       enumerable: false,
@@ -633,6 +634,8 @@
       parentElm.insertBefore(el, oldElm.nextSibling); //插入在老元素的ID之后 紧随那种 不能用append 要不然会在最后
 
       parentElm.removeChild(oldElm); // 删除老结点
+
+      return el;
     } // 递归创建真实结点 替换掉老的结点。
 
   }
@@ -788,6 +791,7 @@
   // 1. 将template转化成ast语法书--》生成render方法--》生成虚拟DOM---》真实DOM
   // 更新过程  重新生成虚拟DOM -》 diff->更新DOM
   // 第一次生成了ast ->render 函数。 更新的时候 我们直接获取render函数 进行值的更新 就可以生成vnode 然后和之前的做比较
+  // 就比如components的vnode 就还有componentOptions和element这个结点。其实都是大同小异。
 
   function renderMixin(Vue) {
     // _c 创建元素的虚拟节点

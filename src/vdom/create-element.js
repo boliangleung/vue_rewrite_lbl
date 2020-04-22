@@ -28,3 +28,5 @@ function vnode(tag,data,key,children,text){
 // 更新过程  重新生成虚拟DOM -》 diff->更新DOM
 
 // 第一次生成了ast ->render 函数。 更新的时候 我们直接获取render函数 进行值的更新 就可以生成vnode 然后和之前的做比较
+
+// 就比如components的vnode 就还有componentOptions和element这个结点。其实都是大同小异。
