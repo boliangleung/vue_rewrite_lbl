@@ -597,22 +597,48 @@
   **/
 
   var Watcher = /*#__PURE__*/function () {
-    function Watcher(vm, exprorFn, callback, options) {
+    function Watcher(vm, exprorFn, cb, options) {
       _classCallCheck(this, Watcher);
 
-      this.vm = vm;
-      this.exprorFn = exprorFn;
-      this.callback = callback;
-      this.options = options;
-      this.getter = exprorFn; //将内部传过来的的回调函数 放到getter属性上
+      // 传进来的对象
+      this.vm = vm; // 在Vue中cb是更新视图的核心，调用diff并更新视图过程
 
-      this.get();
+      this.cb = cb; // 收集Deps 用于移除监听
+
+      this.newDeps = [];
+      this.getter = exprorFn; //将内部传过来的的回调函数 放到getter属性上 执行回调函数
+
+      this.options = options; //设置Dep.target的值，依赖收集时watch 对象
+
+      this.value = this.get();
     }
 
     _createClass(Watcher, [{
       key: "get",
       value: function get() {
-        this.getter();
+        var vm = this.vm;
+        var value = this.getter.call(vm, vm);
+        return value;
+      } //添加依赖
+
+    }, {
+      key: "addDep",
+      value: function addDep(dep) {
+        //  这里简单处理，在VUE中 做了重复筛选，即依赖只收集一次，不重复收集依赖
+        this.newDeps.push(dep);
+        dep.addSub(this);
+      } // 更新
+
+    }, {
+      key: "update",
+      value: function update() {
+        this.run();
+      }
+    }, {
+      key: "run",
+      value: function run() {
+        //这里只做简单的console.log 处理，在Vue中会调用diff过程从而更新视图
+        console.log("\u8FD9\u91CC\u4F1A\u53BB\u6267\u884CVue\u7684diff\u76F8\u5173\u65B9\u6CD5\uFF0C\u8FDB\u800C\u66F4\u65B0\u6570\u636E");
       }
     }]);
 
