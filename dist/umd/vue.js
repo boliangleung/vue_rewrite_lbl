@@ -159,9 +159,148 @@
 
       if (inserted) ob.observerArray(inserted); // 将新增属性一直检测。
 
+      ob.dep.notify();
       return result;
     });
   });
+
+  var uid = 0;
+
+  var Watcher = /*#__PURE__*/function () {
+    function Watcher(vm, exprorFn, cb, options) {
+      _classCallCheck(this, Watcher);
+
+      // 传进来的对象
+      this.vm = vm;
+      this.id = ++uid; // 在Vue中cb是更新视图的核心，调用diff并更新视图过程
+
+      this.cb = cb; // 收集Deps 用于移除监听
+
+      this.newDeps = [];
+      this.getter = exprorFn; //将内部传过来的的回调函数 放到getter属性上 执行回调函数
+
+      this.options = options; //设置Dep.target的值，依赖收集时watch 对象
+
+      this.value = this.get();
+    }
+
+    _createClass(Watcher, [{
+      key: "get",
+      value: function get() {
+        // 设置Dep.target值 用于依赖收集
+        pushTarget(this);
+        var value;
+
+        try {
+          var vm = this.vm;
+          value = this.getter.call(vm, vm);
+        } finally {
+          popTarget();
+        }
+
+        return value;
+      } //添加依赖
+
+    }, {
+      key: "addDep",
+      value: function addDep(dep) {
+        //  这里简单处理，在VUE中 做了重复筛选，即依赖只收集一次，不重复收集依赖
+        this.newDeps.push(dep);
+        dep.addSub(this);
+      } // 更新
+
+    }, {
+      key: "update",
+      value: function update() {
+        if (this.lazy) {
+          this.dirty = true;
+        } else if (this.sync) {
+          this.run();
+        } else {
+          queueWatcher();
+        }
+      }
+    }, {
+      key: "run",
+      value: function run() {
+        //这里只做简单的console.log 处理，在Vue中会调用diff过程从而更新视图
+        console.log("\u8FD9\u91CC\u4F1A\u53BB\u6267\u884CVue\u7684diff\u76F8\u5173\u65B9\u6CD5\uFF0C\u8FDB\u800C\u66F4\u65B0\u6570\u636E");
+      }
+    }]);
+
+    return Watcher;
+  }();
+
+  function queueWatcher() {
+    console.log("\u5F02\u6B65wathcer");
+  }
+
+  var uid$1 = 0; // 删除数据
+
+  function remove(array, item) {
+    var index = array.indexOf(item);
+
+    if (index > -1) {
+      return array.splice(index, 1);
+    }
+  }
+
+  var Dep = /*#__PURE__*/function () {
+    // static target: ?Watcher;
+    // id: number;
+    function Dep() {
+      _classCallCheck(this, Dep);
+
+      this.id = uid$1++;
+      this.subs = [];
+    } // sub是watcher
+
+
+    _createClass(Dep, [{
+      key: "addSub",
+      value: function addSub(sub) {
+        this.subs.push(sub);
+      }
+    }, {
+      key: "removeSub",
+      value: function removeSub(sub) {
+        remove(this.subs, sub);
+      } // 依赖收集，有需要才添加订阅
+
+    }, {
+      key: "depend",
+      value: function depend() {
+        if (Dep.target) {
+          Dep.target.addDep(this); // watcher 里面的addDep方法
+        }
+      }
+    }, {
+      key: "notify",
+      value: function notify() {
+        var subs = this.subs.slice();
+
+        for (var i = 0, l = subs.length; i < l; i++) {
+          subs[i].update();
+        }
+      }
+    }]);
+
+    return Dep;
+  }(); // The current target watcher being evaluated.
+  // This is globally unique because only one watcher
+  // can be evaluated at a time.
+
+
+  Dep.target = null;
+  var targetStack = [];
+  function pushTarget(target) {
+    targetStack.push(target);
+    Dep.target = target;
+  }
+  function popTarget() {
+    targetStack.pop();
+    Dep.target = targetStack[targetStack.length - 1];
+  }
 
   // 如果要delete 内部是使用 vm.$delete 原理是splice
   // 可以通过设置 __ob__ 判断它是不是一个已经监测过的类
@@ -218,17 +357,29 @@
   }();
 
   function defineReactive(data, key, value) {
-    observe(value);
+    var dep = new Dep();
     Object.defineProperty(data, key, {
       enumrable: true,
       configurable: true,
       get: function get() {
+        if (Dep.target) {
+          dep.depend(); // if (childObj) {
+          //   childObj.dep.depend()
+          //   if(Array.isArray(value)){
+          //     console.log(dependArray)
+          //   }
+          // }
+
+          console.log('啵啵啵不', value, dep.id);
+        }
+
         return value;
       },
       set: function set(newVal) {
-        if (newVal === value) return;
+        if (newVal === value || newVal !== newVal && value !== value) return;
         observe(newVal); // 继续劫持用户设置的值，因为有可能设置的值是一个对象
 
+        dep.notify();
         value = newVal; // 利用闭包的特性
       }
     });
@@ -283,12 +434,12 @@
   var ncname = "[a-zA-Z_][\\-\\.0-9_a-zA-Z]*"; // abc-aa
 
   var qnameCapture = "((?:".concat(ncname, "\\:)?").concat(ncname, ")");
-  var startTagOpen = new RegExp("^<".concat(qnameCapture)); // 标签开头的正则 捕获的内容是 标签名 
+  var startTagOpen = new RegExp("^<".concat(qnameCapture)); // 标签开头的正则 捕获的内容是 标签名
 
-  var endTag = new RegExp("^<\\/".concat(qnameCapture, "[^>]*>")); // 匹配标签结尾的 </div> 
+  var endTag = new RegExp("^<\\/".concat(qnameCapture, "[^>]*>")); // 匹配标签结尾的 </div>
   // ID="abc"(3)  'abc'(4) 'ab'(5) //可能捕获到的结果
 
-  var attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+| ([^\s"'=<>`]+)))?/; // 匹配属性的 
+  var attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+| ([^\s"'=<>`]+)))?/; // 匹配属性的
 
   var startTagClose = /^\s*(\/?)>/; // 匹配标签结束的 >
 
@@ -348,7 +499,7 @@
     var element = stack.pop(); // 标识当前这个P是属于这个div的儿子的
 
     currentParent = stack[stack.length - 1]; // 如果存在 因为最后一个标签的话 可能呢是空的
-    // 如果存在 那么该元素的父亲就是currentParent 
+    // 如果存在 那么该元素的父亲就是currentParent
     // 父亲的子节点就是这个element
     // 特殊标签 暂时不做考虑 比如a标签
 
@@ -408,7 +559,7 @@
 
     function parseStartTag() {
       var start = html.match(startTagOpen); // console.log(start)
-      // ["<div", "div", index: 0, xx]  
+      // ["<div", "div", index: 0, xx]
       // 所以我们需要截取第一个<div
 
       if (start) {
@@ -447,12 +598,12 @@
 
   function genProps(attrs) {
     console.log(attrs);
-    var str = "";
+    var str = '';
 
     for (var i = 0; i < attrs.length; i++) {
       var attr = attrs[i];
 
-      if (attr.name === "style") {
+      if (attr.name === 'style') {
         (function () {
           // style="color:red;"=>style:{color:red,} => 最后再加{}
           var obj = {};
@@ -498,20 +649,20 @@
       //元素标签
       return generate(node);
     } else {
-      var text = node.text; //a  {{name}}  b {{age}}  c 
+      var text = node.text; //a  {{name}}  b {{age}}  c
 
       var tokens = [];
       var match, index; // 每次的偏移量
 
-      var lastIndex = defaultTagRE.lastIndex = 0; // 正则的坑 当他匹配一次之后 lastIndex的索引问题 
-      // 只要是全局匹配 就需要将lastIndex每次匹配的lastIndex调到0处。 
+      var lastIndex = defaultTagRE.lastIndex = 0; // 正则的坑 当他匹配一次之后 lastIndex的索引问题
+      // 只要是全局匹配 就需要将lastIndex每次匹配的lastIndex调到0处。
       // /abc/.test('a') 第二次的话 就是false 所以需要重置
 
       while (match = defaultTagRE.exec(text)) {
         index = match.index;
 
         if (index > lastIndex) {
-          //比较匹配到的值上次的值 
+          //比较匹配到的值上次的值
           tokens.push(JSON.stringify(text.slice(lastIndex, index))); // 相当于截取a  这段
         }
 
@@ -530,11 +681,11 @@
 
   function compileToFunction(template) {
     // 1. 解析HTML成AST语法树
-    var root = parseHTML(template); // 2. 需要将ast语法树生成最终的render函数  核心逻辑 字符串拼接  
+    var root = parseHTML(template); // 2. 需要将ast语法树生成最终的render函数  核心逻辑 字符串拼接
 
     var code = generate(root); // <div id="app">
     // <p>{{name}}</p>
-    // <span>{{age}}</span>	
+    // <span>{{age}}</span>
     // </div>
     // _c 创建结点 _s 创建字符串(原理是JSON.stringify) _v 创建文本
     // 最终结果 将ast树 再次转化成JS语法。
@@ -542,7 +693,7 @@
     // render return _c('div',{id:app},_c('p',undefined,_v(_s(name))),_c('span',undefined,_v(_s(age))))
     // 3. 生成函数 所有模板的引擎实现 都需要new Function + with
     // with(this._data){
-    // 	//这里的变量 可以取this._data这个作用域下的值。 
+    // 	//这里的变量 可以取this._data这个作用域下的值。
     // 	console.log(name)
     // }
 
@@ -595,55 +746,6 @@
 
    let r = compiler.compiler("<div></div>")
   **/
-
-  var Watcher = /*#__PURE__*/function () {
-    function Watcher(vm, exprorFn, cb, options) {
-      _classCallCheck(this, Watcher);
-
-      // 传进来的对象
-      this.vm = vm; // 在Vue中cb是更新视图的核心，调用diff并更新视图过程
-
-      this.cb = cb; // 收集Deps 用于移除监听
-
-      this.newDeps = [];
-      this.getter = exprorFn; //将内部传过来的的回调函数 放到getter属性上 执行回调函数
-
-      this.options = options; //设置Dep.target的值，依赖收集时watch 对象
-
-      this.value = this.get();
-    }
-
-    _createClass(Watcher, [{
-      key: "get",
-      value: function get() {
-        var vm = this.vm;
-        var value = this.getter.call(vm, vm);
-        return value;
-      } //添加依赖
-
-    }, {
-      key: "addDep",
-      value: function addDep(dep) {
-        //  这里简单处理，在VUE中 做了重复筛选，即依赖只收集一次，不重复收集依赖
-        this.newDeps.push(dep);
-        dep.addSub(this);
-      } // 更新
-
-    }, {
-      key: "update",
-      value: function update() {
-        this.run();
-      }
-    }, {
-      key: "run",
-      value: function run() {
-        //这里只做简单的console.log 处理，在Vue中会调用diff过程从而更新视图
-        console.log("\u8FD9\u91CC\u4F1A\u53BB\u6267\u884CVue\u7684diff\u76F8\u5173\u65B9\u6CD5\uFF0C\u8FDB\u800C\u66F4\u65B0\u6570\u636E");
-      }
-    }]);
-
-    return Watcher;
-  }();
 
   function patch(oldVode, vnode) {
     console.log(oldVode, vnode); //vnode 和ast抽象树很像 但是真实的情况下 我们还有v-model v-for 事件等等等情况 ast抽象树并不能生成真实的代码
@@ -729,8 +831,9 @@
       //无论渲染还是更新 都会调用此方法
       // 返回的是虚拟DOM_render
       vm._update(vm._render());
-    }; // 渲染watcher 每一个组件都有一个watcher  渲染watcher 不需要通知谁 所以第三个是一个空函数
+    };
 
+    debugger; // 渲染watcher 每一个组件都有一个watcher  渲染watcher 不需要通知谁 所以第三个是一个空函数
 
     new Watcher(vm, updateComponent, function () {}, true); //true标识他是一个渲染watcher
     // 一个组件只有一个渲染watcher

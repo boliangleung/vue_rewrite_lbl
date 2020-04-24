@@ -1,10 +1,11 @@
-import Dep, { pushTarget } from './dep'
+import Dep, { pushTarget, popTarget } from './dep'
 
+let uid = 0
 class Watcher {
   constructor(vm, exprorFn, cb, options) {
     // 传进来的对象
     this.vm = vm
-
+    this.id = ++uid
     // 在Vue中cb是更新视图的核心，调用diff并更新视图过程
     this.cb = cb
     // 收集Deps 用于移除监听
@@ -19,8 +20,13 @@ class Watcher {
   get() {
     // 设置Dep.target值 用于依赖收集
     pushTarget(this)
-    const vm = this.vm
-    let value = this.getter.call(vm, vm)
+    let value
+    try {
+      const vm = this.vm
+      value = this.getter.call(vm, vm)
+    } finally {
+      popTarget(this)
+    }
     return value
   }
   //添加依赖
@@ -31,11 +37,21 @@ class Watcher {
   }
   // 更新
   update() {
-    this.run()
+    if (this.lazy) {
+      this.dirty = true
+    } else if (this.sync) {
+      this.run()
+    } else {
+      queueWatcher(this)
+    }
   }
   run() {
     //这里只做简单的console.log 处理，在Vue中会调用diff过程从而更新视图
     console.log(`这里会去执行Vue的diff相关方法，进而更新数据`)
   }
+}
+
+function queueWatcher() {
+  console.log(`异步wathcer`)
 }
 export default Watcher

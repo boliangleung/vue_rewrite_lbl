@@ -1,32 +1,37 @@
 ﻿<!DOCTYPE html>
 <html>
-<head>
-	<title>rewrite vue lbl</title>
-</head>
-<body>
-	<div id="app"> aini我爱学习
-		<p>hellow</p>
-		<span style="color: red;background: yellow;">{{name}}</span>
-			<span>{{detail.age}}{{detail.love}}</span>
-	</div>
-
-</body>
+  <head>
+    <title>rewrite vue lbl</title>
+  </head>
+  <body>
+    <div id="app">
+      aini我爱学习
+      <p>hellow</p>
+      <span style="color: red;background: yellow;">{{ name }}</span>
+      <span>{{ detail.age }}{{ detail.love }}</span>
+    </div>
+  </body>
 </html>
 <script type="text/javascript" src="/dist/umd/vue.js"></script>
 <!-- <script type="text/javascript" src="/src3.0/try_vue3.0.js"></script> -->
 <script type="text/javascript">
-	let app = new Vue({
-		el:"#app",
-		data(){
-			return{
-				name:"lbl study vue",
-				detail:{
-					age:"25",
-					love:"vue"
-				},
-				observeArr:[{a:1,b:2},'study']
-			}
-		}
-	})
-	app._data.observeArr.unshift({name:"lbl"})
+  let app = new Vue({
+    el: '#app',
+    data() {
+      return {
+        name: 'lbl study vue',
+        detail: {
+          age: '258',
+          love: 'vue'
+        },
+        observeArr: [{ a: 1, b: 2 }, 'study']
+      }
+    }
+  })
+  app.name = 88
+  app.detail.age = '99'
+  // setTimeout(() => {
+  //   console.log(8899889)
+  //   app._data.observeArr.unshift({ name: 'lbl' })
+  // }, 5000)
 </script>
